@@ -1,0 +1,22 @@
+-- Austin Clyde
+-- Lecture 8
+
+-- 8.1*
+module Main where
+import System.Environment
+import Data.Char
+main :: IO ()
+main = do
+  putStrLn "Hello. I am a HAL 9000 series computer."
+  name <- getEnv "USER"
+  putStrLn $ "Good morning, "
+             ++ ((toUpper $ head name):(tail name))
+             ++ "."
+
+{-
+-- running it:
+austin@Austin’s_Macbook:~/cmsc161/classes$ ghc 3l2.hs
+austin@Austin's_Macbook:~/cmsc161/classes$ ./3l2
+Hello. I am a HAL 9000 series computer.
+Good morning, Austin.
+-}

@@ -1,0 +1,8 @@
+-- Class 4
+
+-- where acc is the inital value with the function
+foldr f acc []     = acc
+foldr f acc (x:xs) = f x (foldr f acc xs)
+
+foldl f acc [] = acc
+foldl f acc (x:xs) = foldl(f (f x acc) xs)

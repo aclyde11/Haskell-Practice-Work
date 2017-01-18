@@ -1,0 +1,11 @@
+-- Austin Clyde
+-- Lecture 6
+
+-- 6.2*
+-- For this occurence, the type is
+-- (Int -> [Char]) -> [Int] -> [Char].
+-- Because,
+-- map :: (a -> b) -> [a] -> [b], and 
+-- replicate :: Int -> b -> [b],
+-- a => Int
+-- and '*' => b :: Char.

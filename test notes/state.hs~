@@ -1,0 +1,6 @@
+newtype State b a = State { runState :: b -> (a, b) }
+
+instance Functor (State b) where
+  fmap f st = State $ \s ->
+                        let (a, s') = runState st s in
+                          (f a, s')

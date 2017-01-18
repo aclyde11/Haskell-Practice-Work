@@ -1,0 +1,10 @@
+-- Class 8
+
+-- Going over the HW ord type class thing
+
+-- Haskell IO
+main :: IO ()
+main =
+  do { putStrLn "hello world";
+       putStrLn "hi all"
+     }

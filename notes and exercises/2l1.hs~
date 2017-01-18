@@ -1,0 +1,11 @@
+-- Austin Clyde
+-- Lecture 4
+
+data Person
+  = Student String String Int Int
+  | Teacher String String
+    deriving (Show)
+
+name :: Person -> String
+name (Student f l _ _) = f ++ " " ++ l
+name (Teacher f l) = f ++ " " ++ l

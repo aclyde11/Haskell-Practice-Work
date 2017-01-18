@@ -1,0 +1,46 @@
+
+-- Functor
+-- Laws:
+-- fmap id = id 
+-- fmap (f . g) = fmap f . fmap g
+class Functor f where
+  fmap :: (a -> b) -> f a -> f b
+
+-- Applicative
+-- pure id <*> v = v
+-- pure (.) <*> u <*> v <*> w = u <*> (v <*> w)
+-- pure f <*> pure x = pure (f x) 
+-- u <*> pure y = pure ($ y) <*> u
+Class Functor f => Applicative f where
+  pure :: a -> f a
+  <*>  :: f (a -> b) -> f a -> f b
+
+-- Alternative
+class Applicative f => Alternative f where
+  empty :: f a
+  <|>   :: f a -> f a -> f a
+  
+  -- | One or more.
+  some :: f a -> f [a]
+  some v = some_v
+    where
+      many_v = some_v <|> pure []
+      some_v = (fmap (:) v) <*> many_v
+  -- | Zero or more.
+  many :: f a -> f [a]
+  many v = many_v
+    where
+      many_v = some_v <|> pure []
+      some_v = (fmap (:) v) <*> many_v
+
+class Applicative m => Monad m where
+  return :: a -> f a
+  >>=    :: f a -> (a -> f b) -> f b
+
+class Foldable f where
+  foldMap :: Monoid m => (a -> m) -> f a -> m
+  fold    :: Monoid m => f m -> m
+  foldr   :: (a -> b -> b) -> b -> f a -> b
+  foldl   :: (b -> a -> b) -> b -> f a -> b
+
+  

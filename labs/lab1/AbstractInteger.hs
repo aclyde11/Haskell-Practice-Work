@@ -1,0 +1,160 @@
+{-# OPTIONS_GHC -fno-warn-missing-signatures #-}
+
+-- Austin Clyde
+-- Lab 1
+-- 10/05/2016
+
+module AbstractInteger where
+
+-- Here are some definations for AbstractNatural.
+-- You will probably define your AbstractInteger based on
+-- AbstractNatural.
+
+data AbstractNatural = Zero | S AbstractNatural
+  deriving (Show)
+
+-- You'll learn about the "instance" line in class in Lecture 5.
+-- Short story: Once we tell Haskell that AbstractNatural can do
+-- equality comparisons and how it is totally ordered, we get other
+-- functions for free, like /= and >= and > and <
+--
+-- You may not need these so I've left them commented out, but
+-- you should understand why they work.
+--
+-- instance Eq AbstractNatural where
+-- == Zero = True
+--   Zero == S _  = False
+--   S _  == Zero = False
+--   S x  == S y  = x == y
+--
+-- instance Ord AbstractNatural where
+--   Zero <= Zero = True
+--   Zero <= S _  = True
+--   S _  <= Zero = False
+--   S x  <= S y  = x <= y
+--
+-- successorNat :: AbstractNatural -> AbstractNatural
+-- successorNat = S
+--
+-- predecessorNat :: AbstractNatural -> AbstractNatural
+-- predecessorNat Zero  = Zero
+-- predecessorNat (S x) = x
+
+
+-- Figure out how you will define integers...
+
+data AbstractInteger = Number Bool AbstractNatural
+  deriving (Show)
+
+-- ...then fill out the functions below for your AbstractInteger type.
+
+successor :: AbstractInteger -> AbstractInteger
+successor (Number _ Zero)      = Number True (S Zero)
+successor (Number True n)      = Number True (S(n))
+successor (Number False (S n)) = Number False n
+
+predecessor :: AbstractInteger -> AbstractInteger
+predecessor (Number _ Zero)     = Number False (S (Zero))
+predecessor (Number True (S n)) = Number True n
+predecessor (Number False n)    = Number False (S n)
+
+negator :: AbstractInteger -> AbstractInteger
+negator (Number s n)  = Number (not s) n
+
+absolute :: AbstractInteger -> AbstractInteger
+absolute (Number _ n) = Number True n
+
+add :: AbstractInteger -> AbstractInteger -> AbstractInteger
+add a b = case b of
+      (Number _ Zero)  -> a
+      (Number True _)  -> successor $ add a (predecessor b)
+      (Number False _) -> predecessor $ add a (successor b)
+
+difference :: AbstractInteger -> AbstractInteger -> AbstractInteger
+difference a b = add a (negator b)  
+
+multiply :: AbstractInteger -> AbstractInteger -> AbstractInteger
+multiply _ (Number _ Zero)               = (Number True Zero)
+multiply (Number s1 a) (Number s2 (S b)) =
+      add (multiply (Number sign' a) (Number True b))  (Number sign' a)
+      where sign' = s1 == s2
+
+instance Eq AbstractInteger where
+  Number _ Zero   == Number _ Zero = True
+  Number _ Zero   == Number _ (S _) = False
+  Number _ (S _)  == Number _ Zero = False
+  Number s1 (S x) == Number s2 (S y) = s1 == s2 && (Number s1 x) == (Number s2 y)
+
+instance Ord AbstractInteger where
+  Number False _  <= Number True _ = True
+  Number True _   <= Number False _ = False
+  Number _ Zero   <= Number _ Zero = True
+  Number _ Zero   <= Number _ (S _) = True
+  Number _ (S _)  <= Number _ Zero = False
+  Number s1 (S x) <= Number s2 (S y) = (Number s1 x) <= (Number s2 y) 
+
+divide n d 
+  | zero < n && n < absolute d = (Number True Zero)
+  | d < zero  = multiply negativeOne (divide n (absolute d))
+  | n < zero  = add negativeOne (divide (add n d) d)
+  | otherwise = add one (divide (difference n d) d)
+
+modulo :: AbstractInteger -> AbstractInteger -> AbstractInteger
+modulo n d = difference n (multiply d (divide n d))
+
+toAbstract :: Integer -> AbstractInteger
+toAbstract n
+  | n == 0 = (Number True Zero)
+  | n > 0  = successor (toAbstract (n- 1))
+  | n < 0  = predecessor (toAbstract (n+1))
+
+fromAbstract :: AbstractInteger -> Integer
+fromAbstract n
+  | n == zero = 0
+  | n > zero = 1 + (fromAbstract (predecessor n))
+  | n < zero = (-1) + (fromAbstract (successor n))
+
+-- The core of the RPN caluculator, InputStack -> String -> OutputStack
+-- You will need to provide more cases.
+foldingFunction :: [AbstractInteger] -> String -> [AbstractInteger]
+foldingFunction (y:x:xs) "+"    = add x y : xs
+foldingFunction (y:x:xs) "-"    = difference x y : xs
+foldingFunction (y:x:xs) "*"    = multiply x y : xs
+foldingFunction (x:xs) "abs"    = absolute x : xs
+foldingFunction (y:x:xs) "%"    = modulo x y : xs
+foldingFunction (y:x:xs) "/"    = divide x y : xs
+-- This last case handles numeric inputs, "0" "-2" "34" etc...
+foldingFunction xs numberString = toAbstract (read numberString) : xs
+
+
+-- Take a list of strings, calculate, and return a string result.
+-- You should not need to modify this.
+solveRPN :: [String] -> AbstractInteger
+solveRPN = head . foldl foldingFunction []
+
+-- Convenience constructors. Handy for testing in ghci.
+-- Define zero after you've written your definition of AbstractInteger.
+-- Once you define zero you should get the rest for free.
+zero  = (Number True Zero)
+one   = successor zero
+two   = successor one
+three = successor two
+four  = successor three
+five  = successor four
+six   = successor five
+seven = successor six
+eight = successor seven
+nine  = successor eight
+ten   = successor nine
+
+negativeOne   = predecessor zero
+negativeTwo   = predecessor negativeOne
+negativeThree = predecessor negativeTwo
+negativeFour  = predecessor negativeThree
+negativeFive  = predecessor negativeFour
+negativeSix   = predecessor negativeFive
+negativeSeven = predecessor negativeSix
+negativeEight = predecessor negativeSeven
+negativeNine  = predecessor negativeEight
+negativeTen   = predecessor negativeNine
+

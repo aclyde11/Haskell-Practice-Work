@@ -1,0 +1,8 @@
+
+
+
+
+
+
+runs fs a = foldl f' a fs where
+  f' init f = f init
